@@ -338,6 +338,9 @@ def generateBlacklist(jsonFile):
         if check:
             Attackers = load(file)
     
+    with open('72hourban.txt','w') as banFile:
+        pass
+
     for Attacker in Attackers:
         if determineIfEvil(Attacker) and Attacker["IP"] not in uniqueBadIPs:
             addTo72HourBlacklist(Attacker["IP"])
