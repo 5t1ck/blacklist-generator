@@ -119,14 +119,11 @@ def fetchIPreputation(ip):
     #return json.dumps(decodedResponse, sort_keys=True, indent=4)
 
 def addTo72HourBlacklist(ip):
-    Log(f"Adding {ip} to blacklist")
+    if not isIn72HourBlacklist(ip):
+        Log(f"Adding {ip} to blacklist")
     with open('72hourban.txt', 'a') as IPblacklist:
         IP = f"{ip}\n"
         IPblacklist.write(IP)
-
-    with open('blacklist.txt', 'a') as blacklist:
-        ip = f"{ip}\n"
-        blacklist.write(ip)
 
 def isIn72HourBlacklist(ip):
     with open('72hourban.txt', 'r') as blacklist:
@@ -351,6 +348,17 @@ def generateBlacklist(jsonFile):
 
     with open('needsHuman.json', 'w') as file:
         dump(needsHuman, file, indent=1)
+    
+    with open('threatlist.txt', 'r') as badList:
+        badlist = badList.readlines()
+
+    with open('72hourban.txt', 'r') as blacklist:
+        badIPs = blacklist.readlines()
+
+    with open('blacklist.txt', 'w') as black:
+        black.writelines(badlist)
+        black.writelines("\n\n# Below are our own blacklisted IPs\n")
+        black.writelines(badIPs)
 
 ConvertToJSON('24hours.json', Attackers)
 ConvertToJSON('72hours.json', Attackers)
