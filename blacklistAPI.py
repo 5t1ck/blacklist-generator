@@ -13,6 +13,8 @@ API_KEY = os.getenv("FAST_API_KEY")
 class IP(BaseModel):
     IP: str
     KEY: str
+    SAMPLES: list
+    TL: float
 
 app = FastAPI()
 
@@ -90,7 +92,7 @@ async def addIP(IP: IP):
 
     if IP.KEY != API_KEY:
         return HTTPException(status_code=403,detail="Not Authorized")
-    
+     
     string = f"{IP.IP}\n"
 
     with open('72hourban.txt', 'r') as blacklist:
@@ -104,4 +106,35 @@ async def addIP(IP: IP):
         blacklist.write(string)
 
     return f"IP: {IP.IP} added successfully"
+
+@app.post("/falsepositive")
+async def addFP(IP: IP):
+
+    if IP.KEY != API_KEY:
+        return HTTPException(status_code=403,detail="Not Authorized")
+
+    obj = {"IP": IP.IP, "Avg TL" : IP.TL, "samples" : IP.SAMPLES}
+
+    with open("falsepositives.txt", "a") as FP:
+        FP.write(str(obj)+",\n")
     
+    string = f"Added samples from {IP.IP} to falsepositives.txt"
+    Log(string)
+
+    return f"Successfully added to false positives list"
+
+@app.post("/truepositive")
+async def addTP(IP: IP):
+
+    if IP.KEY != API_KEY:
+        return HTTPException(status_code=403,detail="Not Authorized")
+
+    obj = {"IP": IP.IP, "Avg TL" : IP.TL, "samples" : IP.SAMPLES}
+
+    with open("truepositives.txt", "a") as FP:
+        FP.write(str(obj)+",\n")
+    
+    string = f"Added samples from {IP.IP} to truepositives.txt"
+    Log(string)
+    
+    return f"Successfully added to true positives list"
